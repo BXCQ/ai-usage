@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import {
+  collect,
   fetchBalances,
   fetchModels,
   fetchProviders,
   fetchStats,
-  refresh,
   type BalanceRow,
   type DailyRow,
   type ModelRow,
@@ -46,24 +46,31 @@ export default function App() {
   const [providers, setProviders] = useState<ProviderRow[]>([]);
   const [balances, setBalances] = useState<BalanceRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [reloading, setReloading] = useState(false);
+  const [collecting, setCollecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const range: Range = { from, to };
+
+  const loadData = async (r: Range = range) => {
+    const [s, m, p, b] = await Promise.all([
+      fetchStats(r),
+      fetchModels(r),
+      fetchProviders(r),
+      fetchBalances(),
+    ]);
+    setTotals(s.totals);
+    setDaily(s.daily);
+    setModels(m.models);
+    setProviders(p.providers);
+    setBalances(b.balances);
+  };
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    Promise.all([fetchStats(range), fetchModels(range), fetchProviders(range), fetchBalances()])
-      .then(([s, m, p, b]) => {
-        if (cancelled) return;
-        setTotals(s.totals);
-        setDaily(s.daily);
-        setModels(m.models);
-        setProviders(p.providers);
-        setBalances(b.balances);
-      })
+    loadData(range)
       .catch((e: Error) => {
         if (!cancelled) setError(e.message);
       })
@@ -82,22 +89,37 @@ export default function App() {
     setTo(undefined);
   };
 
-  const onRefresh = async () => {
-    setRefreshing(true);
+  const onReload = async () => {
+    setReloading(true);
+    setError(null);
     try {
-      const summary = await refresh();
+      await loadData();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setReloading(false);
+    }
+  };
+
+  const onCollect = async () => {
+    setCollecting(true);
+    setError(null);
+    try {
+      const summary = await collect();
+      await loadData();
       alert(
-        "采集完成\\n新增事件 " + summary.eventsInserted + "，跳过 " + summary.eventsSkipped +
+        "采集完成\n新增事件 " +
+          summary.eventsInserted +
+          "，跳过 " +
+          summary.eventsSkipped +
           (summary.errors.length
-            ? "\\n⚠️ " + summary.errors.map((e) => e.connector + ": " + e.message).join("\\n")
+            ? "\n⚠️ " + summary.errors.map((e) => e.connector + ": " + e.message).join("\n")
             : ""),
       );
-      setFrom((f) => f ?? daysAgo(30));
-      setTo((t) => t ?? new Date().toISOString().slice(0, 10));
     } catch (e) {
-      alert("刷新失败: " + (e as Error).message);
+      setError("采集失败: " + (e as Error).message);
     } finally {
-      setRefreshing(false);
+      setCollecting(false);
     }
   };
 
@@ -111,13 +133,22 @@ export default function App() {
             跨工具 AI 编程用量聚合 —— token / 请求 / 代码行 / 成本，按日与按模型
           </p>
         </div>
-        <button
-          onClick={onRefresh}
-          disabled={refreshing}
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
-        >
-          {refreshing ? "采集中…" : "刷新数据"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onReload}
+            disabled={reloading || collecting}
+            className="rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-200 hover:bg-neutral-700 disabled:opacity-50"
+          >
+            {reloading ? "刷新中…" : "刷新"}
+          </button>
+          <button
+            onClick={onCollect}
+            disabled={reloading || collecting}
+            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
+          >
+            {collecting ? "采集中…" : "重新采集"}
+          </button>
+        </div>
       </div>
 
       {/* Range filter */}
@@ -181,7 +212,7 @@ export default function App() {
         <KpiCard
           label="估算成本"
           value={totals ? "$" + totals.costUsd.toFixed(2) : "—"}
-          sub="USD，未知模型不计"
+          sub="USD；Cursor 本地估算不计输入单价"
           accent="text-amber-400"
         />
         <KpiCard
@@ -250,7 +281,7 @@ export default function App() {
       </div>
 
       <footer className="mt-10 text-center text-xs text-neutral-600">
-        数据仅存本机 SQLite（~/.ai-usage/usage.db）· 逆向接口默认不接入 · MIT License
+        数据仅存本机 SQLite（~/.ai-usage/usage.db）· Cursor 本地 token 为估算（官网个人中心是服务端账单，数量会更高）· MIT License
       </footer>
     </div>
   );

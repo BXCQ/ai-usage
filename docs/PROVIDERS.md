@@ -45,3 +45,4 @@
 
 - 官方 API：packages/providers/src/official/anthropic.ts（最全，含分页）
 - 本地日志：packages/providers/src/local/claude-code.ts（JSONL 流式解析）
+- 本地 SQLite：packages/providers/src/local/cursor.ts（globalStorage 主读 + workspaceStorage 兼容 + ai-tracking 模型回填）

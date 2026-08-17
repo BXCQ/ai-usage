@@ -43,7 +43,7 @@
 |---|---|---|---|
 | Claude Code 本地日志 | 本地日志 ✅ | 每消息 token（输入/输出/缓存）+ 估算成本 | 零配置（~/.claude/projects） |
 | Codex CLI 本地日志 | 本地日志 ✅ | 每次响应 token + 估算成本 | 零配置（~/.codex/sessions） |
-| Cursor 本地 SQLite | 本地日志 ✅ | Composer 会话：模型/时间/请求数精确；token 缺失时按 4 字符/token 估算 | 零配置（%APPDATA%/Cursor/User/workspaceStorage） |
+| Cursor 本地 SQLite | 本地日志 ✅ | Composer 会话请求数；token 在新版常为 0，输入用会话上下文水位估算、输出按正文+thinking 的 4 字符/token 估算（**低于官网账单**） | 零配置只读（`User/globalStorage/state.vscdb`；兼容 workspaceStorage / Nightly / `CURSOR_USER_DATA_DIR`） |
 | Anthropic Admin | 官方 API ✅ | 按日：会话数、**代码行增删**、commit/PR、按模型 token/成本 | ANTHROPIC_ADMIN_KEY |
 | OpenAI Admin | 官方 API ✅ | 按日 × 按模型 token/请求/成本 | OPENAI_ADMIN_KEY |
 | DeepSeek | 官方 API ✅ | 余额 | DEEPSEEK_API_KEY |
@@ -69,6 +69,8 @@
 | DEEPSEEK_API_KEY / DEEPSEEK_KEY | DeepSeek 余额 |
 | MOONSHOT_API_KEY / KIMI_API_KEY | Kimi 余额（MOONSHOT_REGION=china 走国内节点） |
 | CLAUDE_CONFIG_DIR / CODEX_HOME | 覆盖本地日志目录（可选） |
+| CURSOR_USER_DATA_DIR | 覆盖 Cursor User 目录（便携 / `--user-data-dir` 安装） |
+| CURSOR_AGENT_HOME | 覆盖 `~/.cursor`（ai-tracking 模型回填，可选） |
 | AI_USAGE_DB / PORT | 数据库路径 / API 端口（可选） |
 
 ## 🗺 Roadmap

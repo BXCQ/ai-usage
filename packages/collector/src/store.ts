@@ -45,6 +45,7 @@ export interface Store {
   db: DatabaseSync;
   insertEvents(events: UsageEvent[]): { inserted: number; skipped: number };
   insertBalances(balances: BalanceSnapshot[]): number;
+  deleteBySource(source: string): number;
   getDaily(opts: RangeOpts): DailyRow[];
   getTotals(opts: RangeOpts): Totals;
   getModels(opts: RangeOpts): ModelAgg[];
@@ -88,13 +89,17 @@ CREATE TABLE IF NOT EXISTS balances (
 `;
 
 function keyOf(e: UsageEvent): string {
+  const extra = e.extra as Record<string, unknown> | undefined;
+  if (typeof extra?.composerId === "string" && typeof extra?.bubbleId === "string") {
+    return createHash("sha1").update(`${e.source}|${extra.composerId}|${extra.bubbleId}`).digest("hex");
+  }
   return createHash("sha1")
     .update(`${e.source}|${e.provider}|${e.ts}|${e.model}|${e.inputTokens}|${e.outputTokens}|${e.requests}`)
     .digest("hex");
 }
 
 function whereClause(opts: RangeOpts): { sql: string; params: (string | number)[] } {
-  const conds: string[] = [];
+  const conds: string[] = ["source != 'demo'"];
   const params: (string | number)[] = [];
   if (opts.from) {
     conds.push("date >= ?");
@@ -112,7 +117,7 @@ function whereClause(opts: RangeOpts): { sql: string; params: (string | number)[
     conds.push("model = ?");
     params.push(opts.model);
   }
-  return { sql: conds.length ? "WHERE " + conds.join(" AND ") : "", params };
+  return { sql: "WHERE " + conds.join(" AND "), params };
 }
 
 export function openStore(dbPath: string): Store {
@@ -171,6 +176,11 @@ export function openStore(dbPath: string): Store {
         insertBalanceStmt.run(b.provider, b.capturedAt, b.balanceUsd, b.currency, JSON.stringify(b.meta));
       }
       return balances.length;
+    },
+
+    deleteBySource(source) {
+      const r = db.prepare("DELETE FROM usage_events WHERE source = ?").run(source);
+      return Number(r.changes);
     },
 
     getDaily(opts) {
@@ -264,6 +274,7 @@ export function openStore(dbPath: string): Store {
           FROM balances b
           JOIN (SELECT provider, MAX(id) AS max_id FROM balances GROUP BY provider) m
             ON b.id = m.max_id
+          WHERE b.meta IS NULL OR b.meta NOT LIKE '%"demo":true%'
           ORDER BY b.provider
         `)
         .all() as unknown as BalanceRow[];
@@ -271,8 +282,10 @@ export function openStore(dbPath: string): Store {
     },
 
     counts() {
-      const e = db.prepare("SELECT COUNT(*) AS n FROM usage_events").get() as { n: number };
-      const b = db.prepare("SELECT COUNT(*) AS n FROM balances").get() as { n: number };
+      const e = db.prepare("SELECT COUNT(*) AS n FROM usage_events WHERE source != 'demo'").get() as { n: number };
+      const b = db
+        .prepare(`SELECT COUNT(*) AS n FROM balances WHERE meta IS NULL OR meta NOT LIKE '%"demo":true%'`)
+        .get() as { n: number };
       return { events: e.n, balances: b.n };
     },
 

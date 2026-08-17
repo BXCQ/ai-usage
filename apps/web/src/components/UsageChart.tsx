@@ -42,7 +42,7 @@ export function UsageChart({ daily }: { daily: DailyRow[] }) {
   if (!data.length) {
     return (
       <div className="py-16 text-center text-sm text-neutral-500">
-        暂无数据 —— 先运行 <code>pnpm seed</code> 或 <code>pnpm collect</code>
+        暂无数据 —— 先运行 <code>pnpm collect</code> 采集本地真实用量
       </div>
     );
   }

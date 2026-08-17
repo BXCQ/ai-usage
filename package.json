@@ -20,6 +20,7 @@
     "dev:web": "pnpm --filter @ai-usage/web dev",
     "collect": "pnpm --filter @ai-usage/collector collect",
     "seed": "pnpm --filter @ai-usage/collector seed",
-    "status": "pnpm --filter @ai-usage/collector status"
+    "status": "pnpm --filter @ai-usage/collector status",
+    "purge-demo": "pnpm --filter @ai-usage/collector purge-demo"
   }
 }
