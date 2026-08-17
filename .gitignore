@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.turbo/
+*.db
+*.db-journal
+.env
+.env.*
+.DS_Store
+coverage/
+*.log
+.ai-usage/

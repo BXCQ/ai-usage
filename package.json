@@ -1,0 +1,25 @@
+{
+  "name": "ai-usage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "跨工具 AI 编程用量聚合：token / 调用次数 / 代码行 / 成本，按日与按模型汇总",
+  "license": "MIT",
+  "packageManager": "pnpm@11.22.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "dev": "pnpm -r build && pnpm --parallel --filter @ai-usage/server --filter @ai-usage/web dev",
+    "dev:server": "pnpm --filter @ai-usage/server dev",
+    "dev:web": "pnpm --filter @ai-usage/web dev",
+    "collect": "pnpm --filter @ai-usage/collector collect",
+    "seed": "pnpm --filter @ai-usage/collector seed",
+    "status": "pnpm --filter @ai-usage/collector status"
+  }
+}

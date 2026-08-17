@@ -1,0 +1,29 @@
+{
+  "name": "@ai-usage/collector",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "ai-usage": "dist/cli.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "collect": "node --disable-warning=ExperimentalWarning dist/cli.js collect",
+    "seed": "node --disable-warning=ExperimentalWarning dist/cli.js seed",
+    "status": "node --disable-warning=ExperimentalWarning dist/cli.js status"
+  },
+  "dependencies": {
+    "@ai-usage/core": "workspace:*",
+    "@ai-usage/providers": "workspace:*",
+    "chokidar": "^3.6.0",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/node-cron": "^3.0.11",
+    "typescript": "^5.7.2"
+  }
+}

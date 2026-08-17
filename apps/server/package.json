@@ -1,0 +1,21 @@
+{
+  "name": "@ai-usage/server",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "node --watch --disable-warning=ExperimentalWarning dist/index.js",
+    "start": "node --disable-warning=ExperimentalWarning dist/index.js"
+  },
+  "dependencies": {
+    "@ai-usage/collector": "workspace:*",
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.7.2"
+  }
+}
