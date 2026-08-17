@@ -5,6 +5,7 @@ import { kimi } from "./official/kimi.js";
 import { openai } from "./official/openai.js";
 import { claudeCode } from "./local/claude-code.js";
 import { codex } from "./local/codex.js";
+import { cursorLocal } from "./local/cursor.js";
 import type { CollectContext, CollectResult, ProviderConnector } from "./types.js";
 
 export * from "./types.js";
@@ -19,6 +20,7 @@ export const connectors: ProviderConnector[] = [
   // 本地日志（零配置）
   claudeCode,
   codex,
+  cursorLocal,
 ];
 
 export function getConnector(id: string): ProviderConnector | undefined {

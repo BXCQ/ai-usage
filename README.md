@@ -43,11 +43,12 @@
 |---|---|---|---|
 | Claude Code 本地日志 | 本地日志 ✅ | 每消息 token（输入/输出/缓存）+ 估算成本 | 零配置（~/.claude/projects） |
 | Codex CLI 本地日志 | 本地日志 ✅ | 每次响应 token + 估算成本 | 零配置（~/.codex/sessions） |
+| Cursor 本地 SQLite | 本地日志 ✅ | Composer 会话：模型/时间/请求数精确；token 缺失时按 4 字符/token 估算 | 零配置（%APPDATA%/Cursor/User/workspaceStorage） |
 | Anthropic Admin | 官方 API ✅ | 按日：会话数、**代码行增删**、commit/PR、按模型 token/成本 | ANTHROPIC_ADMIN_KEY |
 | OpenAI Admin | 官方 API ✅ | 按日 × 按模型 token/请求/成本 | OPENAI_ADMIN_KEY |
 | DeepSeek | 官方 API ✅ | 余额 | DEEPSEEK_API_KEY |
 | Kimi / Moonshot | 官方 API ✅ | 余额 | MOONSHOT_API_KEY |
-| Cursor 等逆向接口 | 未接入 ⏸️ | — | 待稳定后再纳入（见 Roadmap） |
+| Cursor / Kimi 明细等逆向接口 | 未接入 ⏸️ | — | 待稳定后再纳入（见 Roadmap） |
 
 ## 🏗 架构
 
