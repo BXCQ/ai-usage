@@ -66,6 +66,12 @@ async function get<T>(url: string): Promise<T> {
   return r.json() as Promise<T>;
 }
 
+async function post<T>(url: string): Promise<T> {
+  const r = await fetch(url, { method: "POST" });
+  if (!r.ok) throw new Error(r.status + " " + (await r.text()));
+  return r.json() as Promise<T>;
+}
+
 function toQuery(range: Range): string {
   const p = new URLSearchParams();
   if (range.from) p.set("from", range.from);
@@ -80,5 +86,7 @@ export const fetchStats = (r: Range) => get<{ totals: Totals; daily: DailyRow[] 
 export const fetchModels = (r: Range) => get<{ models: ModelRow[] }>("/api/models" + toQuery(r));
 export const fetchProviders = (r: Range) => get<{ providers: ProviderRow[] }>("/api/providers" + toQuery(r));
 export const fetchBalances = () => get<{ balances: BalanceRow[] }>("/api/balances");
-export const refresh = () =>
-  get<{ eventsInserted: number; eventsSkipped: number; errors: { connector: string; message: string }[] }>("/api/refresh");
+export const collect = () =>
+  post<{ eventsInserted: number; eventsSkipped: number; errors: { connector: string; message: string }[] }>(
+    "/api/refresh",
+  );

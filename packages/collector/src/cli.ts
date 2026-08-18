@@ -60,13 +60,28 @@ function cmdStatus(dbPath: string) {
     console.log("按 provider 汇总（全部时间）：");
     const providers = store.getProviders({});
     if (!providers.length) {
-      console.log("   （空）先运行 pnpm seed 看演示数据，或 pnpm collect 采集真实数据");
+      console.log("   （空）先运行 pnpm collect 采集真实数据");
     }
     for (const p of providers) {
       console.log(
         `   ${p.provider.padEnd(12)} 输入 ${fmt(p.inputTokens).padStart(6)} 输出 ${fmt(p.outputTokens).padStart(6)} 缓存 ${fmt(p.cacheTokens).padStart(6)} 请求 ${String(p.requests).padStart(5)} 成本 $${p.costUsd.toFixed(2).padStart(8)} 代码行 +${p.linesAdded}/-${p.linesRemoved}`,
       );
     }
+  } finally {
+    store.close();
+  }
+}
+
+function cmdPurgeDemo(dbPath: string) {
+  const store = openStore(dbPath);
+  try {
+    const events = store.db.prepare("DELETE FROM usage_events WHERE source = 'demo'").run();
+    const balances = store.db
+      .prepare(`DELETE FROM balances WHERE meta LIKE '%"demo":true%'`)
+      .run();
+    console.log(`🗑️ 已清除演示数据：${events.changes} 条事件，${balances.changes} 条余额快照`);
+    const c = store.counts();
+    console.log(`📊 剩余：${c.events} 条事件 / ${c.balances} 条余额快照`);
   } finally {
     store.close();
   }
@@ -91,6 +106,8 @@ ai-usage —— 跨工具 AI 编程用量聚合
       写入 30 天演示数据，快速看效果
   ai-usage status [--db path]
       查看库内按 provider 汇总
+  ai-usage purge-demo [--db path]
+      清除库内 source=demo 的演示数据
   ai-usage connectors
       列出已注册连接器
   ai-usage help
@@ -125,6 +142,9 @@ async function main() {
     }
     case "status":
       cmdStatus(dbPath);
+      break;
+    case "purge-demo":
+      cmdPurgeDemo(dbPath);
       break;
     case "connectors":
       cmdConnectors();

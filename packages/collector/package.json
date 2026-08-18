@@ -13,7 +13,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "collect": "node --disable-warning=ExperimentalWarning dist/cli.js collect",
     "seed": "node --disable-warning=ExperimentalWarning dist/cli.js seed",
-    "status": "node --disable-warning=ExperimentalWarning dist/cli.js status"
+    "status": "node --disable-warning=ExperimentalWarning dist/cli.js status",
+    "purge-demo": "node --disable-warning=ExperimentalWarning dist/cli.js purge-demo"
   },
   "dependencies": {
     "@ai-usage/core": "workspace:*",
